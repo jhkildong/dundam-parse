@@ -11,18 +11,19 @@ app.get('/render', async (req, res) => {
   }
   
   try {
-    // Puppeteer 실행 (보안, 리소스 제한에 따라 no-sandbox 옵션 적용 권장)
-    const browser = await puppeteer.launch({ 
+    const browser = await puppeteer.launch({
+      // heroku-buildpack-chrome-for-testing으로 설치된 Chrome 경로를 사용
+      executablePath: process.env.GOOGLE_CHROME_BIN || '/usr/bin/google-chrome',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    // 페이지 이동 시 네트워크가 idle 상태일 때까지 대기
+    // 네트워크가 idle 상태일 때까지 대기
     await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 30000 });
     const content = await page.content();
     await browser.close();
     res.send(content);
   } catch (error) {
-    console.error("Error while rendering:", error);
+    console.error("Error rendering the page:", error);
     res.status(500).json({ error: error.message });
   }
 });
