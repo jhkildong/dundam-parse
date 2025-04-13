@@ -11,16 +11,16 @@ app.get('/render', async (req, res) => {
   }
   
   try {
-    // 먼저 환경변수 GOOGLE_CHROME_BIN가 설정되어 있는지 확인하고,
-    // 없다면 '/app/.apt/usr/bin/google-chrome-stable'를 기본값으로 사용합니다.
-    const executablePath = process.env.GOOGLE_CHROME_BIN || '/app/.apt/usr/bin/google-chrome-stable';
+    // 환경 변수 GOOGLE_CHROME_BIN이나 GOOGLE_CHROME_SHIM가 있다면 사용,
+    // 없다면 기본값으로 '/app/.apt/usr/bin/google-chrome-stable' 시도.
+    const executablePath = process.env.GOOGLE_CHROME_BIN || process.env.GOOGLE_CHROME_SHIM || '/app/.apt/usr/bin/google-chrome-stable';
+    console.log('Using executablePath:', executablePath);
     
     const browser = await puppeteer.launch({
       executablePath: executablePath,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    // 네트워크가 idle 상태일 때까지 대기
     await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 30000 });
     const content = await page.content();
     await browser.close();
