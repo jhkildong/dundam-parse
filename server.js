@@ -3,9 +3,9 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 const app = express();
 
-// 모든 요청에 대해 CORS 허용
+// CORS 설정 (테스트용)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");  // 모든 도메인 허용, 필요에 따라 도메인을 제한할 수 있습니다.
+  res.header("Access-Control-Allow-Origin", "*"); 
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -18,16 +18,18 @@ app.get('/render', async (req, res) => {
   }
   
   try {
-    // 환경 변수나 기본 경로를 통한 Chrome 실행 파일 경로 설정
-    const executablePath = process.env.GOOGLE_CHROME_BIN || process.env.GOOGLE_CHROME_SHIM || '/app/.apt/usr/bin/google-chrome';
+    // 환경 변수 또는 기본 경로에서 Chrome 실행 파일 경로 결정
+    const executablePath = process.env.GOOGLE_CHROME_BIN || '/app/.apt/usr/bin/google-chrome-stable';
     console.log('Using executablePath:', executablePath);
     
     const browser = await puppeteer.launch({
       executablePath: executablePath,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
+    
     const page = await browser.newPage();
-    await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 30000 });
+    // 페이지 로딩 타임아웃을 조금 늘려보세요.
+    await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 45000 });
     const content = await page.content();
     await browser.close();
     res.send(content);
