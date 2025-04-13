@@ -18,8 +18,8 @@ app.get('/render', async (req, res) => {
   }
   
   try {
-    // 환경 변수 또는 기본 경로에서 Chrome 실행 파일 경로 결정
-    const executablePath = process.env.GOOGLE_CHROME_BIN || '/app/.apt/usr/bin/google-chrome-stable';
+    // 우선 PUPPETEER_EXECUTABLE_PATH 환경 변수를 사용하고, 없다면 fallback 값을 사용합니다.
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.GOOGLE_CHROME_BIN || '/app/.apt/usr/bin/chromium-browser';
     console.log('Using executablePath:', executablePath);
     
     const browser = await puppeteer.launch({
@@ -28,7 +28,6 @@ app.get('/render', async (req, res) => {
     });
     
     const page = await browser.newPage();
-    // 페이지 로딩 타임아웃을 조금 늘려보세요.
     await page.goto(targetURL, { waitUntil: 'networkidle0', timeout: 45000 });
     const content = await page.content();
     await browser.close();
